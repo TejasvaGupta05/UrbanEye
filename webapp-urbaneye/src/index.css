@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import './styles/variables.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #f8fafc;
+}
+
+/* Custom Scrollbar for a premium feel */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
+/* --- Accessibility Adjustments --- */
+
+/* Font Size Scaling */
+html.font-size-small {
+    font-size: 14px !important;
+}
+
+html.font-size-large {
+    font-size: 18px !important;
+}
+
+/* Contrast Modes using CSS Filters for robust and instant application */
+
+
+html.contrast-high {
+    filter: contrast(1.5) saturate(1.2);
+}
+
+/* Screen Reader Enhanced Focus */
+html.screen-reader-mode *:focus {
+    outline: 4px solid #ef4444 !important;
+    outline-offset: 2px !important;
+}
+
+/* Push navigation down if toolbar is fixed at top - we put toolbar relative to flow, 
+   so Navbar will need to ensure it doesn't overlap if it's 'fixed top-0'. 
+   Wait, Navbar is 'fixed top-0', if toolbar is in flow above it, it will be hidden by navbar.
+   We need to ensure layout handles it. 
+*/
+/* Push navigation and body down for fixed toolbar */
+body {
+    padding-top: 44px;
+}
+
+.accessibility-toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    z-index: 1000;
+}
+
+/* Hide Google Translate UI elements */
+body {
+    top: 0 !important;
+}
+.skiptranslate iframe {
+    display: none !important;
+}
+#google_translate_element {
+    display: none !important;
+}
