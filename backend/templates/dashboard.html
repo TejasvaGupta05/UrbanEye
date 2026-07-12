@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>City Civic Issue Heatmap</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 300px;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .stat {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .highlight {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .legend {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .gradient {
+            width: 100px;
+            height: 10px;
+            background: linear-gradient(to right, blue, cyan, lime, yellow, red);
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="overlay">
+        <h1>Civic Issue Live Map</h1>
+        <p class="stat">Total Reports: <span id="total-reports" class="highlight">Loading...</span></p>
+        <p class="stat">Status: <span style="color: green;">● Live Updates</span></p>
+
+        <div class="legend">
+            <div class="gradient"></div>
+            <span>Severity</span>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet Heat -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script>
+        // Initialize Map (Centers on Delhi, India)
+        const map = L.map('map').setView([28.6139, 77.2090], 12);
+
+        // Add Dark Mode Tile Layer (looks cooler for heatmaps)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Fetch Heatmap Data
+        async function loadHeatmapData() {
+            try {
+                const response = await fetch('/api/v1/heatmap');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update stats
+                    document.getElementById('total-reports').textContent = data.count;
+
+                    // Add heat layer
+                    // Data format: [lat, lng, intensity]
+                    if (data.points.length > 0) {
+                        const heat = L.heatLayer(data.points, {
+                            radius: 25,
+                            blur: 15,
+                            maxZoom: 17,
+                        }).addTo(map);
+
+                        // Auto-fit bounds if we have points
+                        const bounds = L.latLngBounds(data.points.map(p => [p[0], p[1]]));
+                        map.fitBounds(bounds);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading heatmap data:', error);
+                document.getElementById('total-reports').textContent = "Error";
+            }
+        }
+
+        loadHeatmapData();
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadHeatmapData, 30000);
+    </script>
+</body>
+
+</html>
